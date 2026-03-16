@@ -1,11 +1,15 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests, urllib.parse, re
 
 app = Flask(__name__)
+CORS(app)  # allow all origins
 
 @app.route("/youtube-url")
 def youtube_url():
+
     song = request.args.get("song","").strip()
+
     if not song:
         return jsonify({"error":"song required"}),400
 
@@ -19,6 +23,7 @@ def youtube_url():
     )
 
     ids = re.findall(r"watch\?v=([a-zA-Z0-9_-]{11})", r.text)
+
     if not ids:
         return jsonify({"error":"no video found"}),404
 
@@ -26,9 +31,5 @@ def youtube_url():
 
     return jsonify({
         "video_id": video_id,
-        "watch": f"https://youtube.com/watch?v={video_id}",
         "embed": f"https://www.youtube-nocookie.com/embed/{video_id}?autoplay=1"
     })
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
